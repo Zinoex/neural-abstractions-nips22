@@ -95,11 +95,11 @@ class ReluNet(nn.Module):
         while not stop:
             s = 0
             i += 1
-            if i % 100 == 1:
-                fig = na.NeuralAbstraction((self,), 0,  self.benchmark).plot(show=False)
-                plt.savefig(f"plots/({fig_count})_nl2.png")
-                fig_count += 1
-                plt.clf()
+            # if i % 100 == 1:
+            #     fig = na.NeuralAbstraction((self,), 0,  self.benchmark).plot(show=False)
+            #     plt.savefig(f"plots/({fig_count})_nl2.png")
+            #     fig_count += 1
+            #     plt.clf()
             
             loss = self.loss(self(S), y)
             loss.backward()
