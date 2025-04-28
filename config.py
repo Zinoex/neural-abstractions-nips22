@@ -35,6 +35,7 @@ class Config:
         self.seed = args.seed
         self.repeat = args.repeat
         self.save_net = args.save_net
+        self.fname = args.fname
         self.output_type = args.output_type
         self.output_file = args.output_file
         self.bounded_time = args.bounded_time
