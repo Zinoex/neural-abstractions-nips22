@@ -3,5 +3,5 @@ model=${PWD##*/}
 model=${model:-/} 
 
 ./$model-synth.sh
-./$model-space-ex.sh
+# ./$model-space-ex.sh
 
