@@ -349,7 +349,7 @@ def read_benchmark(name: str):
         return SteamGovernor()
     elif name == "jet":
         return JetEngine()
-    elif name == "buck":
+    elif name == "nl1":
         return NL1()
     elif name == "nl2":
         return NL2()
