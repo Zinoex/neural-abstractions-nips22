@@ -1,5 +1,6 @@
 benchmark: tank
 width: [12]
+model-path: watertank-model.pth
 quiet: True
 scalar: False
 stopping-criterion:

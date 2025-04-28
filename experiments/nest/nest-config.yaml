@@ -1,5 +1,6 @@
 benchmark: exp
 width: [14, 14]
+model-path: exp-model.pth
 quiet: True
 scalar: False
 stopping-criterion:

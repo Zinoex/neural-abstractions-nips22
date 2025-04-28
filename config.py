@@ -14,6 +14,7 @@ class Config:
     def __init__(self, args):
         self.benchmark = args.benchmark
         self.widths = args.width
+        self.model_path = args.model_path
         self.verbose: bool = args.quiet
         self.scalar: bool = args.scalar
         self.learning_mode = args.stopping_criterion['mode']

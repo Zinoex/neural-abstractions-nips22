@@ -1,5 +1,6 @@
 benchmark: jet
 width: [10, 16]
+model-path: jet-model.pth
 quiet: True
 scalar: False
 stopping-criterion:

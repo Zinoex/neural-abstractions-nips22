@@ -1,5 +1,6 @@
 benchmark: nl2
 width: [12, 10]
+model-path: nl2-model.pth
 quiet: True
 scalar: False
 stopping-criterion:

@@ -76,6 +76,14 @@ def parse_command(args=None):
     )
 
     parser.add_argument(
+        "-m",
+        "--model-path",
+        help="Path to model to load",
+        type=str,
+        required=False,
+    )
+
+    parser.add_argument(
         "--seed",
         help="Shifts set random seed by given value",
         type=int,

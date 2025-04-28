@@ -1,5 +1,6 @@
 benchmark: steam
 width: [12]
+model-path: steam-model.pth
 quiet: True
 scalar: False
 stopping-criterion:

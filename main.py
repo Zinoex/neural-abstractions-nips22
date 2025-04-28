@@ -9,9 +9,13 @@ import time
 import warnings 
 
 import torch
+from torch import nn
+import numpy as np
 
 from benchmarks import read_benchmark
 from cegis.cegis import Cegis, ScalarCegis
+from cegis.verifier import DRealVerifier
+from cegis.translator import Translator
 from cli import get_config, parse_command
 import polyhedrons
 from utils import save_net_dict, interpolate_error, get_partitions
@@ -19,33 +23,74 @@ from anal import Analyser
 from neural_abstraction import NeuralAbstraction
 from config import Config
 
+
+class SimpleNN(nn.Module):
+    def __init__(self, input_size, hidden_sizes, output_size):
+        super(SimpleNN, self).__init__()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+        layers = []
+        prev_size = input_size
+        for hidden_size in hidden_sizes:
+            layers.append(nn.Linear(prev_size, hidden_size, device=self.device))  # Create layer on device
+            layers.append(nn.ReLU())
+            prev_size = hidden_size
+        layers.append(nn.Linear(prev_size, output_size, device=self.device))  # Create layer on device
+        self.network = nn.Sequential(*layers)
+        self._initialize_weights()  # Add weight initialization
+
+    def forward(self, x):
+        return self.network(x)
+
+
+class VerificationWrapperNetwork(nn.Module):
+    def __init__(self, net):
+        super(VerificationWrapperNetwork, self).__init__()
+        self.model = net.network
+
+    def forward(self, x):
+        return self.net(x)
+
+
 def main(config: Config):
     benchmark = read_benchmark(config.benchmark)
     if config.target_error == 0:
         config.target_error = interpolate_error(
             benchmark.name, get_partitions(benchmark, config.widths, config.scalar))
-    c = Cegis(benchmark, config.target_error, config.widths,
-                config)
-    T = config.timeout_duration if config.timeout else float("inf")
+    # c = Cegis(benchmark, config.target_error, config.widths,
+    #             config)
+    # T = config.timeout_duration if config.timeout else float("inf")
+
+    verifier_type = DRealVerifier
+    x = verifier_type.new_vars(benchmark.dimension)
+    verifier = verifier_type(
+        x,
+        benchmark.dimension,
+        benchmark.get_domain,
+        verbose=config.verbose,
+    )
+    translator = Translator(x, verifier.relu)
+    truef = np.array(benchmark.f(x)).reshape(-1, 1)
+
+    network = SimpleNN(benchmark.dimension, config.widths, benchmark.dimension)
+    network.load_state_dict(torch.load(config.model_path))
+    network = VerificationWrapperNetwork(network)
 
     t0 = time.perf_counter()
-    if config.iterative:
-        res, net, e = c.synthesise_iteratively(t=T)
-    else:
-        res, net, e = c.synthesise_with_timeout(t=T)
+    candidate = translator.translate(network)
+    found, cex = verifier.verify(truef, candidate, epsilon=config.target_error, p=float('inf'))
     t1 = time.perf_counter()
     delta_t = t1 - t0
-    if config.save_net:
-        nets = net
-        for i, N in enumerate(nets):
-            save_net_dict(config.fname + "dim=" + str(i), N)
+    # if config.save_net:
+    #     nets = net
+    #     for i, N in enumerate(nets):
+    #         save_net_dict(config.fname + "dim=" + str(i), N)
     # benchmark.plotting(net[0])
 
     # NA = NeuralAbstraction(net, e, benchmark)
     print("Benchmark: {}".format(benchmark.name))
-    print("Result: {res}, with error: {e}".format(res=res, e=e))
-    print("Learner Timers: {} \n".format(c.learner[0].get_timer()))
-    print("Verifier Timers: {} \n".format(c.verifier.get_timer()))
+    print("Result: {}".format(found))
+    print("Verifier Timers: {} \n".format(delta_t))
     # print("Abstraction Timers: {} \n".format(NA.get_timer()))
     # print("The abstraction consists of {} modes".format(len(NA.locations)))
     # if "xml" in config.output_type:

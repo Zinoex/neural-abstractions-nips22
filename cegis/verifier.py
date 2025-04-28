@@ -67,7 +67,7 @@ class Verifier:
         raise NotImplementedError("")
 
     @timer(T)
-    def verify(self, f, NN, epsilon=None):
+    def verify(self, f, NN, epsilon=None, p=2):
         """
         :param V: z3 expr
         :param Vdot: z3 expr
@@ -76,7 +76,7 @@ class Verifier:
                 C: a list of ctx
         """
         found = False
-        fmls = self.get_constraints(f, NN, epsilon=epsilon, p=float('inf'))
+        fmls = self.get_constraints(f, NN, epsilon=epsilon, p=p)
         results = []
         solvers = []
 
