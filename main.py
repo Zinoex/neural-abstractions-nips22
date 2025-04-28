@@ -42,6 +42,7 @@ def main(config: Config):
     # benchmark.plotting(net[0])
 
     # NA = NeuralAbstraction(net, e, benchmark)
+    print("Benchmark: {}".format(benchmark.name))
     print("Learner Timers: {} \n".format(c.learner[0].get_timer()))
     print("Verifier Timers: {} \n".format(c.verifier.get_timer()))
     # print("Abstraction Timers: {} \n".format(NA.get_timer()))
