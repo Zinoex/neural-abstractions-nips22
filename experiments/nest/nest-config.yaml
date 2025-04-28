@@ -20,6 +20,6 @@ timeout: False
 timeout-duration: 120
 seed: 0
 repeat: 1
-save-net: False
+save-net: True
 bounded-time: True
 time-horizon: 1.0
