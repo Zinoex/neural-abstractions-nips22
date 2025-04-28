@@ -5,6 +5,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import os
 import signal
 from decimal import Decimal
 import traceback
@@ -15,6 +16,9 @@ import functools
 
 import torch
 import pandas as pd
+
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def vprint(m, v: bool):
     """Prints first arg if second arg is True"""
@@ -47,7 +51,9 @@ class Timeout:
 
 def save_net_dict(filename: str, net):
     """Saves a network's state_dict to a file"""
-    filename = "results/nets/" + filename + "_net.pth"
+    dir = os.path.join(BASEDIR, "results/nets/")
+    filename = os.path.join(dir, filename + "_net.pth")
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     torch.save(net.state_dict(), filename)
 
 
