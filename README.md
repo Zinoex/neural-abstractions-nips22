@@ -10,16 +10,13 @@ For your convenience we provide a Docker file. Docker can be installed by visiti
 
 ```console
 # docker build -t ubuntu:na .
-# docker run --name na --rm --v $(pwd)/results:/neural-abstractions/results -it ubuntu:na bash
+# docker run --name na --rm --v $(pwd)/results/:/neural-abstraction/results/ -it ubuntu:na bash
 ```
 
 Here, the container is name `na` for simplicity.
 
-You are now inside the container. Move to the project directory.
+You are now inside the container in the project directory `/neural-abstraction`.
 
-```console
-cd /neural-abstractions
-```
 
 You are now able to run the program. The settings for a program are determined using a .yaml config file, the default location for which is `./config.yaml`. The used config file can be changed using the `-c` command line option. Note, the desired network structure must be passed using the command line option `-w` and is not settable from the config file.
 
