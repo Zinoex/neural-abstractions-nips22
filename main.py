@@ -41,29 +41,29 @@ def main(config: Config):
             save_net_dict(config.fname + "dim=" + str(i), N)
     # benchmark.plotting(net[0])
 
-    NA = NeuralAbstraction(net, e, benchmark)
+    # NA = NeuralAbstraction(net, e, benchmark)
     print("Learner Timers: {} \n".format(c.learner[0].get_timer()))
     print("Verifier Timers: {} \n".format(c.verifier.get_timer()))
-    print("Abstraction Timers: {} \n".format(NA.get_timer()))
-    print("The abstraction consists of {} modes".format(len(NA.locations)))
-    if "xml" in config.output_type:
-        if config.initial:
-            XI = polyhedrons.vertices2polyhedron(config.initial)
-        else:
-            XI = None
-        if config.forbidden:
-            XU = polyhedrons.vertices2polyhedron(config.forbidden) # Currently unused
-        NA.to_xml(config.output_file, bounded_time=config.bounded_time, T=config.time_horizon, initial_state=XI)
-    if "csv" in config.output_type:
-        a = Analyser(NA)
-        a.record(config.output_file, config, res, delta_t)
-    if "plot" in config.output_type:
-        if benchmark.dimension !=2:
-            warnings.warn("Attempted to plot for n-dimensional system")
-        else:  
-            NA.plot(label=True)
-    if "pkl" in config.output_type:
-        NA.to_pkl(config.output_file)
+    # print("Abstraction Timers: {} \n".format(NA.get_timer()))
+    # print("The abstraction consists of {} modes".format(len(NA.locations)))
+    # if "xml" in config.output_type:
+    #     if config.initial:
+    #         XI = polyhedrons.vertices2polyhedron(config.initial)
+    #     else:
+    #         XI = None
+    #     if config.forbidden:
+    #         XU = polyhedrons.vertices2polyhedron(config.forbidden) # Currently unused
+    #     NA.to_xml(config.output_file, bounded_time=config.bounded_time, T=config.time_horizon, initial_state=XI)
+    # if "csv" in config.output_type:
+    #     a = Analyser(NA)
+    #     a.record(config.output_file, config, res, delta_t)
+    # if "plot" in config.output_type:
+    #     if benchmark.dimension !=2:
+    #         warnings.warn("Attempted to plot for n-dimensional system")
+    #     else:  
+    #         NA.plot(label=True)
+    # if "pkl" in config.output_type:
+    #     NA.to_pkl(config.output_file)
 
 
 
