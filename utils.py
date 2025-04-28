@@ -185,6 +185,7 @@ class Timer:
 
         self._sum = 0
         self._start = 0
+        self._lastest = 0
 
     def start(self):
         """Starts the timer"""
@@ -197,6 +198,7 @@ class Timer:
         assert now >= self._start > 0
         self._start = 0
         self.n_updates += 1
+        self._lastest = diff
         self._sum += diff
         self.min = min(self.min, diff)
         self.max = max(self.max, diff)
@@ -214,8 +216,8 @@ class Timer:
         return self._sum
 
     def __repr__(self):
-        return "total={}s,min={}s,max={}s,avg={}s".format(
-            self._sum, self.min, self.max, self.avg
+        return "total={}s,min={}s,max={}s,avg={}s,latest={}s".format(
+            self._sum, self.min, self.max, self.avg, self._lastest
         )
 
 
