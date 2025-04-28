@@ -76,7 +76,7 @@ class Verifier:
                 C: a list of ctx
         """
         found = False
-        fmls = self.get_constraints(f, NN, epsilon=epsilon)
+        fmls = self.get_constraints(f, NN, epsilon=epsilon, p=float('inf'))
         results = []
         solvers = []
 
