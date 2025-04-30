@@ -10,7 +10,7 @@ For your convenience we provide a Docker file. Docker can be installed by visiti
 
 ```console
 # docker build -t ubuntu:na .
-# docker run --name na --rm --v $(pwd)/results/:/neural-abstraction/results/ -it ubuntu:na bash
+# docker run --name na --rm -v $(pwd)/results/:/neural-abstraction/results/ -it ubuntu:na
 ```
 
 Here, the container is name `na` for simplicity.

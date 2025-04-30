@@ -5,6 +5,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import os
 import time
 import warnings 
 
@@ -23,6 +24,8 @@ from anal import Analyser
 from neural_abstraction import NeuralAbstraction
 from config import Config
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class SimpleNN(nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size):
@@ -37,7 +40,6 @@ class SimpleNN(nn.Module):
             prev_size = hidden_size
         layers.append(nn.Linear(prev_size, output_size, device=self.device))  # Create layer on device
         self.network = nn.Sequential(*layers)
-        self._initialize_weights()  # Add weight initialization
 
     def forward(self, x):
         return self.network(x)
@@ -73,12 +75,13 @@ def main(config: Config):
     truef = np.array(benchmark.f(x)).reshape(-1, 1)
 
     network = SimpleNN(benchmark.dimension, config.widths, benchmark.dimension)
-    network.load_state_dict(torch.load(config.model_path))
+    path = os.path.join(BASE_DIR, "results/nets", config.model_path)
+    network.load_state_dict(torch.load(path))
     network = VerificationWrapperNetwork(network)
 
     t0 = time.perf_counter()
     candidate = translator.translate(network)
-    found, cex = verifier.verify(truef, candidate, epsilon=config.target_error, p=float('inf'))
+    found, cex = verifier.verify(truef, candidate, epsilon=[config.target_error for _ in range(benchmark.dimension)])
     t1 = time.perf_counter()
     delta_t = t1 - t0
     # if config.save_net:
