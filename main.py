@@ -19,7 +19,7 @@ from cegis.verifier import DRealVerifier
 from cegis.translator import Translator
 from cli import get_config, parse_command
 import polyhedrons
-from utils import save_net_dict, interpolate_error, get_partitions
+from utils import Timeout, save_net_dict, interpolate_error, get_partitions
 from anal import Analyser
 from neural_abstraction import NeuralAbstraction
 from config import Config
@@ -51,7 +51,7 @@ class VerificationWrapperNetwork(nn.Module):
         self.model = net.network
 
     def forward(self, x):
-        return self.net(x)
+        return self.model(x)
 
 
 def main(config: Config):
@@ -76,24 +76,29 @@ def main(config: Config):
 
     network = SimpleNN(benchmark.dimension, config.widths, benchmark.dimension)
     path = os.path.join(BASE_DIR, "results/nets", config.model_path)
-    network.load_state_dict(torch.load(path))
+    network.load_state_dict(torch.load(path, map_location=torch.device("cpu")))
     network = VerificationWrapperNetwork(network)
 
-    t0 = time.perf_counter()
-    candidate = translator.translate(network)
-    found, cex = verifier.verify(truef, candidate, epsilon=[config.target_error for _ in range(benchmark.dimension)])
-    t1 = time.perf_counter()
-    delta_t = t1 - t0
-    # if config.save_net:
-    #     nets = net
-    #     for i, N in enumerate(nets):
-    #         save_net_dict(config.fname + "dim=" + str(i), N)
-    # benchmark.plotting(net[0])
-
-    # NA = NeuralAbstraction(net, e, benchmark)
+    timeout = 3600
     print("Benchmark: {}".format(benchmark.name))
-    print("Result: {}".format(found))
-    print("Verifier Timers: {} \n".format(delta_t))
+    try:
+        with Timeout(seconds=timeout):
+            t0 = time.perf_counter()
+            candidate = translator.translate(network)
+            found, cex = verifier.verify(truef, candidate, epsilon=[config.target_error for _ in range(benchmark.dimension)])
+            t1 = time.perf_counter()
+            delta_t = t1 - t0
+            # if config.save_net:
+            #     nets = net
+            #     for i, N in enumerate(nets):
+            #         save_net_dict(config.fname + "dim=" + str(i), N)
+            # benchmark.plotting(net[0])
+
+            # NA = NeuralAbstraction(net, e, benchmark)
+            print("Result: {}, {}".format(found, cex))
+            print("Verifier Timers: {} \n".format(delta_t))
+    except TimeoutError:
+        print(f"Timeout ({timeout}) occurred")
     # print("Abstraction Timers: {} \n".format(NA.get_timer()))
     # print("The abstraction consists of {} modes".format(len(NA.locations)))
     # if "xml" in config.output_type:

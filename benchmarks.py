@@ -236,7 +236,7 @@ class NL1(Benchmark):
                 f = f = [y, dreal.sqrt(x)]
             except TypeError:
                 f = [
-                    y - sp.sqrt(x),
+                    y, sp.sqrt(x),
                 ]
         return [fi / si for fi, si in zip(f, self.scale)]
 
@@ -264,7 +264,7 @@ class NL2(Benchmark):
             try:
                 f = f = [x**2 + y, dreal.pow(dreal.pow(x, 2), 1 / 3) - x]
             except TypeError:
-                f = [-x*y + y, sp.Pow(sp.Pow(x, 1), 1 / 3) - x]
+                f = [x**2 + y, sp.Pow(sp.Pow(x, 1), 1 / 3) - x]
         return [fi / si for fi, si in zip(f, self.scale)]
 
 
@@ -273,7 +273,7 @@ class WaterTank(Benchmark):
         self.dimension = 1
         self.name = "Water-tank"
         self.short_name = "tank"
-        self.domain = Rectangle([0], [2])
+        self.domain = Rectangle([0.1], [10])
         self.scale = [1 for i in range(self.dimension)]
         # self.image = self.get_image()
         # self.normalise()#
@@ -329,6 +329,87 @@ class Exponential(Benchmark):
         x, y = v
         f = [imath.sin(imath.exp(y)), imath.exp(imath.sin(x))]
         return [fi / si for fi, si in zip(f, self.scale)]
+    
+
+class VanDerPol(Benchmark):
+    def __init__(self) -> None:
+        self.dimension = 2
+        self.name = "Van der Pol"
+        self.short_name = "vdp"
+        self.domain = Rectangle([-3, -3], [3, 3])
+        self.scale = [1 for i in range(self.dimension)]
+        self.image = self.get_image()
+        self.mu = 1.0
+        # self.normalise()
+
+    def f(self, v):
+        x, y = v
+        f = [-y, self.mu * (1 - x**2) * y - x]
+        return [fi / si for fi, si in zip(f, self.scale)]
+
+
+class Sine2D(Benchmark):
+    def __init__(self) -> None:
+        self.dimension = 2
+        self.name = "Sine2D"
+        self.short_name = "sine2d"
+        self.domain = Rectangle([-2, -2], [2, 2])
+        self.scale = [1 for i in range(self.dimension)]
+        self.image = self.get_image()
+        self.freq_y = 1.0
+        self.freq_x = 1.0
+        # self.normalise()
+
+    def f(self, v):
+        x, y = v
+        try:
+            f = [np.sin(self.freq_y * y), -np.sin(self.freq_x * x)]
+        except TypeError:
+            try:
+                f = [dreal.sin(self.freq_y * y), -dreal.sin(self.freq_x * x)]
+            except TypeError:
+                f = [sp.sin(self.freq_y * y), -sp.sin(self.freq_x * x)]
+        return [fi / si for fi, si in zip(f, self.scale)]
+
+
+class NonlinearOscillator(Benchmark):
+    def __init__(self) -> None:
+        self.dimension = 1
+        self.name = "Nonlinear Oscillator"
+        self.short_name = "nonlin-osc"
+        self.domain = Rectangle([-3.0], [3.0])
+        self.scale = [1 for i in range(self.dimension)]
+        # self.image = self.get_image()
+        # self.normalise()#
+        
+        # Parameters for the nonlinear terms
+        self.linear_coeff = 1.0
+        self.cubic_coeff = 0.5
+        self.sine_coeff = 0.3
+
+    def get_data(self, n=10000):
+        """
+        Returns tensor of data points sampled from domain
+        """
+        return self.domain.generate_bloated_data(n, bloat=0)
+    
+    def f(self, v):
+        x = v
+        try:
+            if isinstance(x, np.ndarray):
+                f = [-self.linear_coeff * x - self.cubic_coeff * (x ** 3) + self.sine_coeff * np.sin(x)]
+            else:
+                f = [-self.linear_coeff * x - self.cubic_coeff * (x ** 3) + self.sine_coeff * torch.sin(x)]
+        except TypeError:
+            try:
+                x, = v
+                f = [-self.linear_coeff * x - self.cubic_coeff * (x ** 3) + self.sine_coeff * dreal.sin(x)]
+            except TypeError:
+                f = [-self.linear_coeff * x - self.cubic_coeff * (x ** 3) + self.sine_coeff * sp.sin(x)]
+        return [fi / si for fi, si in zip(f, self.scale)]
+    
+    def plotting(self, net, name: str = None):
+        return
 
 
 
@@ -355,6 +436,10 @@ def read_benchmark(name: str):
         return NL2()
     elif name == "tank":
         return WaterTank()
+    elif name == "vdp":
+        return VanDerPol()
+    elif name == "sine2d":
+        return Sine2D()
 
 
 if __name__ == "__main__":

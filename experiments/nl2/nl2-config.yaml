@@ -5,7 +5,7 @@ quiet: True
 scalar: False
 stopping-criterion:
   mode: loss   # Train to target error or loss minimum
-  target-error: 0.03
+  target-error: 0.081
   loss-stop: 6.7e-5
   loss-grad-stop: .inf
   loss-grad-grad-stop: .inf
