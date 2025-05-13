@@ -5,6 +5,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from functools import partial
+import multiprocessing
 import os
 import time
 import warnings 
@@ -54,6 +56,12 @@ class VerificationWrapperNetwork(nn.Module):
         return self.model(x)
 
 
+def verify(res_queue, verify, network, translator):
+    candidate = translator.translate(network)
+    found, cex = verify(candidate)
+    res_queue.put((found, cex))
+
+
 def main(config: Config):
     benchmark = read_benchmark(config.benchmark)
     if config.target_error == 0:
@@ -79,26 +87,34 @@ def main(config: Config):
     network.load_state_dict(torch.load(path, map_location=torch.device("cpu")))
     network = VerificationWrapperNetwork(network)
 
+    res_queue = multiprocessing.Queue()
+    verifier_verify = partial(verifier.verify, truef, epsilon=[config.target_error for _ in range(benchmark.dimension)])
+
     timeout = 3600
     print("Benchmark: {}".format(benchmark.name))
-    try:
-        with Timeout(seconds=timeout):
-            t0 = time.perf_counter()
-            candidate = translator.translate(network)
-            found, cex = verifier.verify(truef, candidate, epsilon=[config.target_error for _ in range(benchmark.dimension)])
-            t1 = time.perf_counter()
-            delta_t = t1 - t0
-            # if config.save_net:
-            #     nets = net
-            #     for i, N in enumerate(nets):
-            #         save_net_dict(config.fname + "dim=" + str(i), N)
-            # benchmark.plotting(net[0])
 
-            # NA = NeuralAbstraction(net, e, benchmark)
-            print("Result: {}, {}".format(found, cex))
-            print("Verifier Timers: {} \n".format(delta_t))
-    except TimeoutError:
-        print(f"Timeout ({timeout}) occurred")
+    process = multiprocessing.Process(target=verify, args=(res_queue, verifier_verify, network, translator))
+
+    t0 = time.perf_counter()
+    process.start()
+
+    # Wait for {timeout} seconds or until process finishes
+    process.join(timeout)
+
+    # If thread is still active
+    if process.is_alive():
+        print("running... let's kill it...")
+
+        process.kill()
+        process.join()
+    else:
+        print("finished... let's get the result...")
+        t1 = time.perf_counter()
+        delta_t = t1 - t0
+        found, cex = res_queue.get()
+        print("Result: {}, {}".format(found, cex))
+        print("Verifier Timers: {} \n".format(delta_t))
+
     # print("Abstraction Timers: {} \n".format(NA.get_timer()))
     # print("The abstraction consists of {} modes".format(len(NA.locations)))
     # if "xml" in config.output_type:
