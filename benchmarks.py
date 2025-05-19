@@ -268,7 +268,7 @@ class WaterTank(Benchmark):
         Returns tensor of data points sampled from domain
         """
         return self.domain.generate_bloated_data(n, bloat=0)
-    
+
     def f(self, v):
         x = v
         try:
@@ -283,6 +283,7 @@ class WaterTank(Benchmark):
             except TypeError:
                 f = [1.5 - sp.sqrt(x)]
         return [fi / si for fi, si in zip(f, self.scale)]
+
 
 class Exponential(Benchmark):
     def __init__(self) -> None:
@@ -363,7 +364,7 @@ class NonlinearOscillator(Benchmark):
         self.scale = [1 for i in range(self.dimension)]
         # self.image = self.get_image()
         # self.normalise()#
-        
+
         # Parameters for the nonlinear terms
         self.linear_coeff = 1.0
         self.cubic_coeff = 0.5
@@ -374,7 +375,7 @@ class NonlinearOscillator(Benchmark):
         Returns tensor of data points sampled from domain
         """
         return self.domain.generate_bloated_data(n, bloat=0)
-    
+
     def f(self, v):
         x = v
         try:
@@ -389,7 +390,6 @@ class NonlinearOscillator(Benchmark):
             except TypeError:
                 f = [-self.linear_coeff * x - self.cubic_coeff * (x ** 3) + self.sine_coeff * sp.sin(x)]
         return [fi / si for fi, si in zip(f, self.scale)]
-
 
 
 def read_benchmark(name: str):
@@ -421,4 +421,3 @@ def read_benchmark(name: str):
         return Sine2D()
     elif name == "nonlin-osc":
         return NonlinearOscillator()
-

@@ -12,7 +12,6 @@ import yaml
 
 def parse_command(args=None):
     parser = configargparse.ArgParser(
-        default_config_files=["config.yaml"],
         config_file_parser_class=configargparse.YAMLConfigFileParser,
     )
 
@@ -207,10 +206,3 @@ def get_name(args):
         + ")"
     )
     return args
-
-
-
-
-if __name__ == "__main__":
-    config = get_default_config()
-    print(config)
