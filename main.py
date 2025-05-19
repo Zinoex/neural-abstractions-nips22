@@ -9,21 +9,15 @@ from functools import partial
 import multiprocessing
 import os
 import time
-import warnings 
 
 import torch
 from torch import nn
 import numpy as np
 
 from benchmarks import read_benchmark
-from cegis.cegis import Cegis, ScalarCegis
-from cegis.verifier import DRealVerifier
-from cegis.translator import Translator
-from cli import get_config, parse_command
-import polyhedrons
-from utils import Timeout, save_net_dict, interpolate_error, get_partitions
-from anal import Analyser
-from neural_abstraction import NeuralAbstraction
+from verifier import DRealVerifier
+from translator import Translator
+from cli import get_config
 from config import Config
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -64,12 +58,6 @@ def verify(res_queue, verify, network, translator):
 
 def main(config: Config):
     benchmark = read_benchmark(config.benchmark)
-    if config.target_error == 0:
-        config.target_error = interpolate_error(
-            benchmark.name, get_partitions(benchmark, config.widths, config.scalar))
-    # c = Cegis(benchmark, config.target_error, config.widths,
-    #             config)
-    # T = config.timeout_duration if config.timeout else float("inf")
 
     verifier_type = DRealVerifier
     x = verifier_type.new_vars(benchmark.dimension)
@@ -114,28 +102,6 @@ def main(config: Config):
         found, cex = res_queue.get()
         print("Result: {}, {}".format(found, cex))
         print("Verifier Timers: {} \n".format(delta_t))
-
-    # print("Abstraction Timers: {} \n".format(NA.get_timer()))
-    # print("The abstraction consists of {} modes".format(len(NA.locations)))
-    # if "xml" in config.output_type:
-    #     if config.initial:
-    #         XI = polyhedrons.vertices2polyhedron(config.initial)
-    #     else:
-    #         XI = None
-    #     if config.forbidden:
-    #         XU = polyhedrons.vertices2polyhedron(config.forbidden) # Currently unused
-    #     NA.to_xml(config.output_file, bounded_time=config.bounded_time, T=config.time_horizon, initial_state=XI)
-    # if "csv" in config.output_type:
-    #     a = Analyser(NA)
-    #     a.record(config.output_file, config, res, delta_t)
-    # if "plot" in config.output_type:
-    #     if benchmark.dimension !=2:
-    #         warnings.warn("Attempted to plot for n-dimensional system")
-    #     else:  
-    #         NA.plot(label=True)
-    # if "pkl" in config.output_type:
-    #     NA.to_pkl(config.output_file)
-
 
 
 if __name__ == "__main__":

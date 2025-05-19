@@ -14,7 +14,6 @@ import sympy as sp
 from interval import imath, interval
 import numpy as np
 import torch
-import sysplot
 from domains import Rectangle, Sphere
 
 
@@ -63,17 +62,6 @@ class Benchmark:
             torch.Tensor: sampled data
         """
         return self.domain.generate_bloated_data(n)
-
-    def plotting(self, net, name: str = None):
-        """Plots the benchmark and a neural network's output.
-
-        Args:
-            net (ReLUNet): Neural network to plot.
-            name (str, optional):
-                Name of file to save plot to. If None, then plot is show.
-                Defaults to None.
-        """
-        sysplot.plot_vector_fields(net, self, [-1, 1], [-1, 1], name=name)
 
     def get_image(self):
         """Find the image of the function wrt the domain."""
@@ -141,9 +129,6 @@ class Linear(Benchmark):
         Returns tensor of data points sampled from domain
         """
         return self.domain.generate_bloated_data(n)
-
-    def plotting(self, net, name: str = None):
-        sysplot.plot_vector_fields(net, self, [-1, 1], [-1, 1], name=name)
 
 
 class SteamGovernor(Benchmark):
@@ -298,9 +283,6 @@ class WaterTank(Benchmark):
             except TypeError:
                 f = [1.5 - sp.sqrt(x)]
         return [fi / si for fi, si in zip(f, self.scale)]
-    
-    def plotting(self, net, name: str = None):
-        return
 
 class Exponential(Benchmark):
     def __init__(self) -> None:
@@ -329,7 +311,7 @@ class Exponential(Benchmark):
         x, y = v
         f = [imath.sin(imath.exp(y)), imath.exp(imath.sin(x))]
         return [fi / si for fi, si in zip(f, self.scale)]
-    
+
 
 class VanDerPol(Benchmark):
     def __init__(self) -> None:
@@ -338,8 +320,8 @@ class VanDerPol(Benchmark):
         self.short_name = "vdp"
         self.domain = Rectangle([-3, -3], [3, 3])
         self.scale = [1 for i in range(self.dimension)]
-        self.image = self.get_image()
         self.mu = 1.0
+        self.image = self.get_image()
         # self.normalise()
 
     def f(self, v):
@@ -355,9 +337,9 @@ class Sine2D(Benchmark):
         self.short_name = "sine2d"
         self.domain = Rectangle([-2, -2], [2, 2])
         self.scale = [1 for i in range(self.dimension)]
-        self.image = self.get_image()
         self.freq_y = 1.0
         self.freq_x = 1.0
+        self.image = self.get_image()
         # self.normalise()
 
     def f(self, v):
@@ -407,9 +389,6 @@ class NonlinearOscillator(Benchmark):
             except TypeError:
                 f = [-self.linear_coeff * x - self.cubic_coeff * (x ** 3) + self.sine_coeff * sp.sin(x)]
         return [fi / si for fi, si in zip(f, self.scale)]
-    
-    def plotting(self, net, name: str = None):
-        return
 
 
 
@@ -440,17 +419,6 @@ def read_benchmark(name: str):
         return VanDerPol()
     elif name == "sine2d":
         return Sine2D()
+    elif name == "nonlin-osc":
+        return NonlinearOscillator()
 
-
-if __name__ == "__main__":
-    for n in ("nl2",):
-        b = read_benchmark(n)
-        # b.normalise()
-        print(b.name)
-        # print(b.get_image())
-        if b.dimension == 2:
-            from matplotlib import pyplot as plt
-
-            sysplot.plot_benchmark(b)
-            plt.gca().set_aspect("equal")
-            sysplot.show()

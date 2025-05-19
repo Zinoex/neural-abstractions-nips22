@@ -53,6 +53,9 @@ def parse_command(args=None):
             "nl1",
             "nl2",
             "tank",
+            "vdp",
+            "nonlin-osc",
+            "sine2d"
         ),
     )
 

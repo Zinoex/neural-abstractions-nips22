@@ -5,12 +5,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from typing import Callable, List, Tuple
+from typing import Callable, Tuple
 
 import numpy as np
-from torch.nn import Sequential
-
-from cegis.nn import ReluNet
 
 
 class Translator:
@@ -27,7 +24,7 @@ class Translator:
         self.input_vars = np.array(vars).reshape(-1, 1)
         self.relu = relu
 
-    def translate(self, net: ReluNet, dp=8) -> np.ndarray:
+    def translate(self, net, dp=8) -> np.ndarray:
         """ Performs the translation of the neural network.
 
         Args:

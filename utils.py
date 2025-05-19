@@ -63,49 +63,6 @@ def check_timeout_loc() -> bool:
     return "self.verifier.verify" in trace
 
 
-# def load_model(benchmark: str, error: float, width: int, dim: int):
-#     """Loads a saved torch model from a file.
-
-#     Assumes filenames have the following format:
-#     results/nets/(benchmark=<benchmark>, error=<error>, width=<width>, seed=<seed>)
-#     Args:
-#         benchmark (str): benchmark name
-#         error (float): error bound
-#         width (int): network widths
-#         dim (int): number of dimensions
-
-#     Returns:
-#         _type_: loaded torch model
-#     """
-#     filename = "results/nets/(benchmark={}, error={}, width={})_net.pth".format(
-#         benchmark, error, width
-#     )
-#     model = cegis.nn.ReluNet(dim, width, error)
-#     model.load_state_dict(torch.load(filename))
-#     return model
-
-
-# def load_scalar_models(benchmark, error: float, width: int, seed: int):
-
-#     models = [
-#         cegis.nn.ScalarReluNet(benchmark, width, error)
-#         for i in range(benchmark.dimension)
-#     ]
-#     l = []
-#     for i, model in enumerate(models):
-#         filename = (
-#             "results/nets/(benchmark={}, error={}, width={}, seed={})".format(
-#                 benchmark.short_name, 0.0, width, seed
-#             )
-#             + "dim="
-#             + str(i)
-#             + "_net.pth"
-#         )
-#         model.load_state_dict(torch.load(filename))
-#         l.append(model)
-#     return l
-
-
 def log_interpolate(x, x1, x2, y1, y2):
     """Perform interpolation on a logarithmic scale.
 
