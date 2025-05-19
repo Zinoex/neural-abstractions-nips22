@@ -4,5 +4,5 @@ bench=("nl1" "nl2" "jet" "steam" "exp" "watertank" "nl164" "nl264" "jet64" "stea
 
 for b in "${bench[@]}"
 do
-    time python3 ../main.py -c $b/config.yaml
+    python3 ../main.py -c $b/config.yaml
 done
